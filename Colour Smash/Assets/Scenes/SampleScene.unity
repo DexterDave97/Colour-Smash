@@ -225,6 +225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4470babb6de811d4eb791f80ad4c9fbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  delay: 0.02
   colors:
   - {r: 1, g: 1, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}

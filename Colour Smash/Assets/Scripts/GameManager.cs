@@ -5,6 +5,9 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static bool gameOver;
+    bool pauseState = false;
+    public float delay;
+    [Space]
     [SerializeField] private Color[] colors = new Color[12];
     [SerializeField] private Sprite[] sprites = new Sprite[13];
     void Start()
@@ -13,140 +16,33 @@ public class GameManager : MonoBehaviour
     }
     void Update()
     {
-        MoveTiles();
+        //Debug.Log(pauseState);
+        if(!pauseState)
+            MoveTiles();
     }
 
     void MoveTiles()
     {
         if (Input.GetKeyDown(KeyCode.A) || TouchInputManager.instance.SwipeLeft)
         {
-            SlideToSide(KeyCode.A);
-            CheckToMerge(KeyCode.A);
-            SlideToSide(KeyCode.A);
-            CreateNewTiles(KeyCode.A);
+            StartCoroutine(SlideCoroutine(KeyCode.A));
         }
 
-        if (Input.GetKeyDown(KeyCode.D) || TouchInputManager.instance.SwipeRight)
+        else if (Input.GetKeyDown(KeyCode.D) || TouchInputManager.instance.SwipeRight)
         {
-            SlideToSide(KeyCode.D);
-            CheckToMerge(KeyCode.D);
-            SlideToSide(KeyCode.D);
-            CreateNewTiles(KeyCode.D);
+            StartCoroutine(SlideCoroutine(KeyCode.D));
         }
 
-        if (Input.GetKeyDown(KeyCode.W) || TouchInputManager.instance.SwipeUp)
+        else if (Input.GetKeyDown(KeyCode.W) || TouchInputManager.instance.SwipeUp)
         {
-            SlideToSide(KeyCode.W);
-            CheckToMerge(KeyCode.W);
-            SlideToSide(KeyCode.W);
-            CreateNewTiles(KeyCode.W);
+            StartCoroutine(SlideCoroutine(KeyCode.W));
         }
 
-        if (Input.GetKeyDown(KeyCode.S) || TouchInputManager.instance.SwipeDown)
+        else if (Input.GetKeyDown(KeyCode.S) || TouchInputManager.instance.SwipeDown)
         {
-            SlideToSide(KeyCode.S);
-            CheckToMerge(KeyCode.S);
-            SlideToSide(KeyCode.S);
-            CreateNewTiles(KeyCode.S);
+            StartCoroutine(SlideCoroutine(KeyCode.S));
         }
-    }
-
-    void SlideToSide(KeyCode key)
-    {
-        int i, j, k;
-        switch (key)
-        {
-            case KeyCode.A:
-                for (i = 1; i < AlignCubes.gridSize; i++)
-                {
-                    for (j = 0; j < AlignCubes.gridSize; j++)
-                    {
-                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType !="Black")
-                        {
-                            TileProperty thisCube = PlayZone.instance.currentState[i, j];
-                            TileProperty otherCube = PlayZone.instance.currentState[i - 1, j];
-                            k = i;
-                            while (k > 0 && !PlayZone.instance.currentState[k - 1, j])
-                            {
-                                thisCube.transform.parent.position += Vector3.left;
-                                //thisCube.transform.parent.position = Vector3.Lerp(PlayZone.instance.currentState[i, j].transform.position, thisCube.transform.parent.position + Vector3.left, 1);                              
-                                thisCube.iPos = k - 1;
-                                PlayZone.instance.currentState[k - 1, j] = thisCube;
-                                PlayZone.instance.currentState[k, j] = null;
-                                k--;
-                            }
-                        }
-                    }
-                }
-                break;
-            case KeyCode.D:
-                for (i = AlignCubes.gridSize - 2; i >= 0; i--)
-                {
-                    for (j = 0; j < AlignCubes.gridSize; j++)
-                    {
-                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
-                        {
-                            TileProperty thisCube = PlayZone.instance.currentState[i, j];
-                            TileProperty otherCube = PlayZone.instance.currentState[i + 1, j];
-                            k = i;
-                            while (k < AlignCubes.gridSize - 1 && !PlayZone.instance.currentState[k + 1, j])
-                            {
-                                thisCube.transform.parent.position += Vector3.right;
-                                thisCube.iPos = k + 1;
-                                PlayZone.instance.currentState[k + 1, j] = thisCube;
-                                PlayZone.instance.currentState[k, j] = null;
-                                k++;
-                            }
-                        }
-                    }
-                }
-                break;
-            case KeyCode.W:
-                for (j = AlignCubes.gridSize - 2; j >= 0; j--)
-                {
-                    for (i = 0; i < AlignCubes.gridSize; i++)
-                    {
-                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
-                        {
-                            TileProperty thisCube = PlayZone.instance.currentState[i, j];
-                            TileProperty otherCube = PlayZone.instance.currentState[i, j + 1];
-                            k = j;
-                            while (k < AlignCubes.gridSize - 1 && !PlayZone.instance.currentState[i, k + 1])
-                            {
-                                thisCube.transform.parent.position += Vector3.up;
-                                thisCube.jPos = k + 1;
-                                PlayZone.instance.currentState[i, k + 1] = thisCube;
-                                PlayZone.instance.currentState[i, k] = null;
-                                k++;
-                            }
-                        }
-                    }
-                }
-                break;
-            case KeyCode.S:
-                for (j = 1; j < AlignCubes.gridSize; j++)
-                {
-                    for (i = 0; i < AlignCubes.gridSize; i++)
-                    {
-                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
-                        {
-                            TileProperty thisCube = PlayZone.instance.currentState[i, j];
-                            TileProperty otherCube = PlayZone.instance.currentState[i, j - 1];
-                            k = j;
-                            while (k > 0 && !PlayZone.instance.currentState[i, k - 1])
-                            {
-                                thisCube.transform.parent.position += Vector3.down;
-                                thisCube.jPos = k - 1;
-                                PlayZone.instance.currentState[i, k - 1] = thisCube;
-                                PlayZone.instance.currentState[i, k] = null;
-                                k--;
-                            }
-                        }
-                    }
-                }
-                break;
-        }
-    }
+    }    
 
     void CheckToMerge(KeyCode key)
     {
@@ -185,6 +81,10 @@ public class GameManager : MonoBehaviour
                                 PlayZone.instance.currentState[i, j] = null;
                                 PlayZone.instance.currentState[i - 1, j].transform.parent.GetComponent<Animator>().Play("Pop", 0, 0);
                                 Destroy(thisCube.transform.parent.gameObject);
+                                if (!PlayZone.instance.currentState[i - 1, j])
+                                {
+                                    Debug.Log(i + " " + j);
+                                }
                                 if (PlayZone.instance.currentState[i - 1, j].colorType == "Ultimate")
                                 {
                                     Destroy(otherCube.transform.parent.gameObject);
@@ -230,6 +130,10 @@ public class GameManager : MonoBehaviour
                                 PlayZone.instance.currentState[i, j] = null;
                                 PlayZone.instance.currentState[i + 1, j].transform.parent.GetComponent<Animator>().Play("Pop", 0, 0);
                                 Destroy(thisCube.transform.parent.gameObject);
+                                if (!PlayZone.instance.currentState[i + 1, j])
+                                {
+                                    Debug.Log(i + " " + j);
+                                }
                                 if (PlayZone.instance.currentState[i + 1, j].colorType == "Ultimate")
                                 {
                                     Destroy(otherCube.transform.parent.gameObject);
@@ -274,6 +178,10 @@ public class GameManager : MonoBehaviour
                                 PlayZone.instance.currentState[i, j] = null;
                                 PlayZone.instance.currentState[i, j + 1].transform.parent.GetComponent<Animator>().Play("Pop", 0, 0);
                                 Destroy(thisCube.transform.parent.gameObject);
+                                if (!PlayZone.instance.currentState[i, j + 1])
+                                {
+                                    Debug.Log(i + " " + j);
+                                }
                                 if (PlayZone.instance.currentState[i, j + 1].colorType == "Ultimate")
                                 {
                                     Destroy(otherCube.transform.parent.gameObject);
@@ -318,6 +226,10 @@ public class GameManager : MonoBehaviour
                                 PlayZone.instance.currentState[i, j] = null;
                                 PlayZone.instance.currentState[i, j - 1].transform.parent.GetComponent<Animator>().Play("Pop", 0, 0);
                                 Destroy(thisCube.transform.parent.gameObject);
+                                if (!PlayZone.instance.currentState[i, j - 1])
+                                {
+                                    Debug.Log(i + " " + j);
+                                }
                                 if (PlayZone.instance.currentState[i, j - 1].colorType == "Ultimate")
                                 {
                                     Destroy(otherCube.transform.parent.gameObject);
@@ -434,7 +346,7 @@ public class GameManager : MonoBehaviour
                 break;
         }
     }
-
+    
     int Mix(TileProperty t1, TileProperty t2, ref TileProperty newTile)
     {
         if ((t1.color == colors[0] && t2.color == colors[1]) || (t2.color == colors[0] && t1.color == colors[1]))
@@ -505,5 +417,227 @@ public class GameManager : MonoBehaviour
         }
         else
             return 12;
+    }
+
+    bool SlideToSide(KeyCode key)
+    {
+        int i, j;
+        switch (key)
+        {
+            case KeyCode.A:
+                for (i = 1; i < AlignCubes.gridSize; i++)
+                {
+                    for (j = 0; j < AlignCubes.gridSize; j++)
+                    {
+                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                        {
+                            TileProperty otherCube = PlayZone.instance.currentState[i - 1, j];
+                            if (otherCube == null)
+                            {
+                                PlayZone.instance.currentState[i, j].transform.parent.position += Vector3.left;
+                                PlayZone.instance.currentState[i - 1, j] = PlayZone.instance.currentState[i, j];
+                                PlayZone.instance.currentState[i, j] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+            case KeyCode.D:
+                for (i = AlignCubes.gridSize - 2; i >= 0; i--)
+                {
+                    for (j = 0; j < AlignCubes.gridSize; j++)
+                    {
+                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                        {
+                            TileProperty thisCube = PlayZone.instance.currentState[i, j];
+                            TileProperty otherCube = PlayZone.instance.currentState[i + 1, j];
+                            if (otherCube == null)
+                            {
+                                PlayZone.instance.currentState[i, j].transform.parent.position += Vector3.right;
+                                PlayZone.instance.currentState[i + 1, j] = PlayZone.instance.currentState[i, j];
+                                PlayZone.instance.currentState[i, j] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+            case KeyCode.W:
+                for (j = AlignCubes.gridSize - 2; j >= 0; j--)
+                {
+                    for (i = 0; i < AlignCubes.gridSize; i++)
+                    {
+                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                        {
+                            TileProperty otherCube = PlayZone.instance.currentState[i, j + 1];
+                            if (otherCube == null)
+                            {
+                                PlayZone.instance.currentState[i, j].transform.parent.position += Vector3.up;
+                                PlayZone.instance.currentState[i, j + 1] = PlayZone.instance.currentState[i, j];
+                                PlayZone.instance.currentState[i, j] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+            case KeyCode.S:
+                for (j = 1; j < AlignCubes.gridSize; j++)
+                {
+                    for (i = 0; i < AlignCubes.gridSize; i++)
+                    {
+                        if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                        {
+                            TileProperty otherCube = PlayZone.instance.currentState[i, j - 1];
+                            if (otherCube == null)
+                            {
+                                PlayZone.instance.currentState[i, j].transform.parent.position += Vector3.down;
+                                PlayZone.instance.currentState[i, j - 1] = PlayZone.instance.currentState[i, j];
+                                PlayZone.instance.currentState[i, j] = null;
+                                return true;
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+
+        return false;
+    }
+
+    /*void SlideToSide(KeyCode key)
+   {
+       int i, j, k;
+       Vector2[,] PosVectors = new Vector2[AlignCubes.gridSize, AlignCubes.gridSize];
+       for (i = 1; i < AlignCubes.gridSize; i++)
+       {
+           for (j = 0; j < AlignCubes.gridSize; j++)
+           {
+               PosVectors[i, j] = new Vector2(i, j);
+           }
+       }
+
+       switch (key)
+       {
+           case KeyCode.A:
+               for (i = 1; i < AlignCubes.gridSize; i++)
+               {
+                   for (j = 0; j < AlignCubes.gridSize; j++)
+                   {
+                       if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                       {
+                           TileProperty thisCube = PlayZone.instance.currentState[i, j];
+                           TileProperty otherCube = PlayZone.instance.currentState[i - 1, j];
+                           k = i;
+                           while (k > 0 && !PlayZone.instance.currentState[k - 1, j])
+                           {
+                               thisCube.iPos = k - 1;
+                               PlayZone.instance.currentState[k - 1, j] = thisCube;
+                               PlayZone.instance.currentState[k, j] = null;
+                               PosVectors[i, j] = new Vector2(PosVectors[i, j].x-1, PosVectors[i, j].y);
+                               k--;
+                           }
+                       }
+                   }
+               }
+               break;
+           case KeyCode.D:
+               for (i = AlignCubes.gridSize - 2; i >= 0; i--)
+               {
+                   for (j = 0; j < AlignCubes.gridSize; j++)
+                   {
+                       if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                       {
+                           TileProperty thisCube = PlayZone.instance.currentState[i, j];
+                           TileProperty otherCube = PlayZone.instance.currentState[i + 1, j];
+                           k = i;
+                           while (k < AlignCubes.gridSize - 1 && !PlayZone.instance.currentState[k + 1, j])
+                           {
+                               thisCube.transform.parent.position += Vector3.right;
+                               thisCube.iPos = k + 1;
+                               PlayZone.instance.currentState[k + 1, j] = thisCube;
+                               PlayZone.instance.currentState[k, j] = null;
+                               k++;
+                           }
+                       }
+                   }
+               }
+               break;
+           case KeyCode.W:
+               for (j = AlignCubes.gridSize - 2; j >= 0; j--)
+               {
+                   for (i = 0; i < AlignCubes.gridSize; i++)
+                   {
+                       if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                       {
+                           TileProperty thisCube = PlayZone.instance.currentState[i, j];
+                           TileProperty otherCube = PlayZone.instance.currentState[i, j + 1];
+                           k = j;
+                           while (k < AlignCubes.gridSize - 1 && !PlayZone.instance.currentState[i, k + 1])
+                           {
+                               thisCube.transform.parent.position += Vector3.up;
+                               thisCube.jPos = k + 1;
+                               PlayZone.instance.currentState[i, k + 1] = thisCube;
+                               PlayZone.instance.currentState[i, k] = null;
+                               k++;
+                           }
+                       }
+                   }
+               }
+               break;
+           case KeyCode.S:
+               for (j = 1; j < AlignCubes.gridSize; j++)
+               {
+                   for (i = 0; i < AlignCubes.gridSize; i++)
+                   {
+                       if (PlayZone.instance.currentState[i, j] && PlayZone.instance.currentState[i, j].colorType != "Black")
+                       {
+                           TileProperty thisCube = PlayZone.instance.currentState[i, j];
+                           TileProperty otherCube = PlayZone.instance.currentState[i, j - 1];
+                           k = j;
+                           while (k > 0 && !PlayZone.instance.currentState[i, k - 1])
+                           {
+                               thisCube.jPos = k - 1;
+                               PlayZone.instance.currentState[i, k - 1] = thisCube;
+                               PlayZone.instance.currentState[i, k] = null;
+                               k--;
+                           }
+                       }
+                   }
+               }
+               break;
+       }
+       SetTilePos(PlayZone.instance.currentState, PosVectors);
+   }*/
+    /*void SetTilePos(TileProperty[,] newMap, Vector2[,] movePositions)
+    {
+        for (int i = 0; i < AlignCubes.gridSize; i++)
+            for (int j = 0; j < AlignCubes.gridSize; j++)
+            {
+                if(newMap[(int)movePositions[i, j].x,j])
+                {
+                    while(newMap[(int)movePositions[i, j].x, j].transform.parent.position!= new Vector3(movePositions[i,j].x - ((AlignCubes.gridSize - 1) / 2f), movePositions[i, j].y - (AlignCubes.gridSize - 1) / 2f))
+                        newMap[(int)movePositions[i, j].x, j].transform.parent.position = Vector3.Lerp(newMap[(int)movePositions[i, j].x, j].transform.parent.position, new Vector3(movePositions[i, j].x - ((AlignCubes.gridSize - 1) / 2f), movePositions[i, j].y - (AlignCubes.gridSize - 1) / 2f),0.1f);
+                }
+            }
+    }*/
+
+
+    IEnumerator SlideCoroutine(KeyCode key)
+    {
+        pauseState = true;
+        while (SlideToSide(key))
+        {
+            yield return new WaitForSeconds(delay);
+        }
+        CheckToMerge(key);
+        while (SlideToSide(key))
+        {
+            yield return new WaitForSeconds(delay);
+        }
+        CreateNewTiles(key);
+        pauseState = false;
+        StopAllCoroutines();
     }
 }

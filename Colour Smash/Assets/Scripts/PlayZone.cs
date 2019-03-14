@@ -9,5 +9,5 @@ public class PlayZone
     {
         instance = this;
     }
-    public TileProperty[,] currentState = new TileProperty[5,5];
+    public TileProperty[,] currentState = new TileProperty[AlignCubes.gridSize, AlignCubes.gridSize];
 }
